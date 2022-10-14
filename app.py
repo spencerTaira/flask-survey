@@ -8,13 +8,10 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-responses = []
-
 
 @app.get("/")
 def show_home_page():
     # """Return initial page with title, instructions, and button"""
-    # responses[:] = []
     title = survey.title
     instruction = survey.instructions
     return render_template(
@@ -25,7 +22,7 @@ def show_home_page():
 
 @app.post("/begin")
 def begin_survey():
-    responses.clear()
+    session["responses"] = []
     return redirect("/questions/0")
 
 
@@ -45,10 +42,11 @@ def handle_answer():
     """Save answer to global variable and redirect to next question"""
     answer = request.form["answer"]
     question_number = int(request.form["current_question"]) + 1
-    responses.append(answer)
-    print(len(responses), responses)
-    
-    if len(responses) == len(survey.questions):
+    response = session["response"]
+    response.append(answer)
+    session["response"] = response
+
+    if len(session["response"]) == len(survey.questions):
         return redirect("/thankyou")
     else:
         return redirect(f"/questions/{question_number}")
@@ -57,5 +55,5 @@ def handle_answer():
 @app.get("/thankyou")
 def handle_completion():
     """Redirect user to completion page once done with survey"""
-    questions_and_answers = zip(survey.questions, responses)
+    questions_and_answers = zip(survey.questions, session["response"])
     return render_template("completion.html", questions_and_answers=questions_and_answers)
