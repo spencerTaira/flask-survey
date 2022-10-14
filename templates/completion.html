@@ -3,5 +3,9 @@
 {% block content %}
 
   <h1>Thanks for completing this survey!</h1>
-
+<ol>
+{%for question, answer in questions_and_answers%}
+  <li>{{question.question}}: {{answer}}</li>
+{% endfor %}
+</ol>
 {% endblock %}
